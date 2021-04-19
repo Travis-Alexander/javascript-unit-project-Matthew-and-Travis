@@ -24,4 +24,5 @@ Griffin                | 3  | 600  |  400  |  0    |
 Skeleton               | 1  | 100  |  100  |  0    |
 Zombie                 | 1  | 250  |  50   |  10   |
 Lesser Shield          | 1  | 200  |  0    |  150  | "Shield" cards must be targeted for attacks
-Meat Shield            | 1  | 10   |  10   |  0    | 
+Meat Shield            | 1  | 10   |  10   |  0    | "Shield" cards must be targeted for attacks
+Faerie Fighter         | 1  | 350  |  200  |  50   |
