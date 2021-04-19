@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Cards(models.Model):
+class Card(models.Model):
     attack = models.PositiveIntegerField()
     health = models.PositiveIntegerField()
     defense = models.PositiveIntegerField()
