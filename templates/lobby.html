@@ -2,6 +2,8 @@
 {% block content %}
 <h1>{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
 <h2 id="hostLP"></h2>
+<p>Remove LP from the host</p>
+<input type="button" id="remove-lp-from-host">
 <!-- <input type="out"> -->
 {% endblock content %}
 {% block domready %}
@@ -19,5 +21,9 @@ chatSocket.onmessage = function(e) {
     document.getElementById("hostLP").innerText = data._host_lp;
 }
 
+var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
+remove_hp_from_host.addEventListener("click", function() {
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50"}))
+})
 </script>
 {% endblock %}

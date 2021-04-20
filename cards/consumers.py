@@ -20,10 +20,10 @@ class CardConsumer(AsyncWebsocketConsumer):
         print(ishost)
         istaken = await self.takenSlot()
         if ishost:
-            self.scope['_host_deck'] = self.user.decks
+            self.scope['_host_deck'] = await self.querySetToList(self.user.decks.all())
             self.scope['_host_cards_in_deck'] = self.scope['_host_deck']
         elif istaken == False:
-            self.scope['_player_deck'] = self.user.decks
+            self.scope['_player_deck'] = await self.querySetToList(self.user.decks.all())
             self.scope['_player_cards_in_deck'] = self.scope['_player_deck']
             await self.registerPlayer()
         
@@ -53,6 +53,9 @@ class CardConsumer(AsyncWebsocketConsumer):
             }
         )
     @database_sync_to_async
+    def querySetToList(self, query_set):
+        return list(query_set)
+    @database_sync_to_async
     def hostOrPlayer(self):
         return Lobby.objects.get(id=self.id).host.id == self.user.id
     @database_sync_to_async
@@ -76,6 +79,11 @@ class CardConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        print("IN", text_data, text_data_json)
+        if text_data_json["action"] == "attack":
+            if text_data_json['target'] == "host":
+                self.scope['_host_lp'] = int(self.scope['_host_lp']) - int(text_data_json['value'])
+                print("LP", self.scope['_host_lp'])
         await self.channel_layer.group_send (
             self.room_group_name,
             {
