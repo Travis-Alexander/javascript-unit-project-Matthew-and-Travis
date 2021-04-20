@@ -12,7 +12,7 @@ django_asgi_app = get_asgi_application()
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
-from chat.consumers import ChatConsumer
+from cards.consumers import CardConsumer
 
 application = ProtocolTypeRouter(
     {
@@ -21,7 +21,7 @@ application = ProtocolTypeRouter(
         # WebSocket chat handler
         "websocket": AuthMiddlewareStack(
             URLRouter(
-                [url(r"ws/chat/room/(?P<room_id>\d+)/$", ChatConsumer.as_asgi()),]
+                [url(r"ws/lobby/(?P<lobby_id>\d+)/$", CardConsumer.as_asgi()),]
             )
         ),
     }
