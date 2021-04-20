@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>{{ lobby.host.username }}</h1>
-
+<h1>{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
+<h2 id="hostLP"></h2>
+<!-- <input type="out"> -->
 {% endblock content %}
 {% block domready %}
 <script type="text/javascript">
+
 var web_socket_type = "wss://";
 if (window.location.host == "127.0.0.1:8000")
 {
     web_socket_type = "ws://";
 };
 var url = web_socket_type + window.location.host + '/ws/lobby/' + '{{ lobby.id }}/';
-console.log(url)
 var chatSocket = new WebSocket(url);
+chatSocket.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+    document.getElementById("hostLP").innerText = data._host_lp;
+}
+
 </script>
 {% endblock %}
