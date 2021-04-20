@@ -16,13 +16,18 @@ class CardConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
         self.id = self.scope['url_route']['kwargs']['lobby_id']
+        self.lobby = await self.getLobby(self.id)
         ishost = await self.hostOrPlayer()
         print(ishost)
         istaken = await self.takenSlot()
         if ishost:
             self.scope['_host_deck'] = await self.querySetToList(self.user.decks.all())
             self.scope['_host_cards_in_deck'] = self.scope['_host_deck']
+            self.scope['_player_deck'] = await self.querySetToList(self.lobby.player.decks.all())
+            self.scope['_player_cards_in_deck'] = self.scope['_player_deck']
         elif istaken == False:
+            self.scope['_host_deck'] = await self.querySetToList(self.lobby.host.decks.all())
+            self.scope['_host_cards_in_deck'] = self.scope['_host_deck']
             self.scope['_player_deck'] = await self.querySetToList(self.user.decks.all())
             self.scope['_player_cards_in_deck'] = self.scope['_player_deck']
             await self.registerPlayer()
@@ -53,21 +58,24 @@ class CardConsumer(AsyncWebsocketConsumer):
             }
         )
     @database_sync_to_async
+    def getLobby(self, pk):
+        return Lobby.objects.get(id=self.id)
+    @database_sync_to_async
     def querySetToList(self, query_set):
         return list(query_set)
     @database_sync_to_async
     def hostOrPlayer(self):
-        return Lobby.objects.get(id=self.id).host.id == self.user.id
+        return self.lobby.host.id == self.user.id
     @database_sync_to_async
     def takenSlot(self):
-        tPlayer = Lobby.objects.get(id=self.id).player
+        tPlayer = self.lobby.player
         if tPlayer: print(tPlayer.username, self.user.username)
         if tPlayer == None: return False
         if tPlayer.id == self.user.id: return False
         return True
     @database_sync_to_async
     def registerPlayer(self):
-        L = Lobby.objects.get(id=self.id)
+        L = self.lobby
         L.player = self.user
         L.save()
     async def disconnect(self, close_code):
@@ -82,7 +90,7 @@ class CardConsumer(AsyncWebsocketConsumer):
         print("IN", text_data, text_data_json)
         if text_data_json["action"] == "attack":
             if text_data_json['target'] == "host":
-                self.scope['_host_lp'] = int(self.scope['_host_lp']) - int(text_data_json['value'])
+                self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
                 print("LP", self.scope['_host_lp'])
         await self.channel_layer.group_send (
             self.room_group_name,
