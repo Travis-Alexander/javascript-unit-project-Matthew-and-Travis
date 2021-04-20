@@ -17,6 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from .views import lobby_room
+from accounts.views import (
+    AcceptFriendRequest,
+    DeclineFriendRequest,
+    RemoveFriend,
+    SendFriendRequest,
+    UserProfile
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +31,9 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('lobby/<int:lobby_id>/', lobby_room, name="lobby"),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('user/<int:pk>', UserProfile.as_view(), name="user_profile"),
+    path('send_friend_request/<int:userID>/', SendFriendRequest, name="send_friend_request",),
+    path("accept_friend_request/<int:requestID>/", AcceptFriendRequest, name="accept_friend_request",),
+    path("decline_friend_request/<int:requestID>/", DeclineFriendRequest, name="decline_friend_request",),
+    path("remove_friend/<int:userID>/", RemoveFriend, name="remove_friend"),
 ]

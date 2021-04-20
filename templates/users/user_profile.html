@@ -1,0 +1,38 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+
+<div id="profile">
+	<div id="profile-main">
+		<header>
+			<h1>{{ profile_user.username }}</h1>
+			{% if profile_user != request.user and profile_user not in request.user.friends.all %}
+				<form action="/send_friend_request/{{ profile_user.id }}/" method="POST">
+					{% csrf_token %}
+					<button type="submit">Send Friend Request</button>
+				</form>
+			{% endif %}
+		</header>
+	<div id="friends">
+		<div>
+			<h1>Friends:</h1>
+			{% for friend in profile_user.friends.all %}
+				<p><a href="{% url 'user_profile' friend.id%}">{{ friend }}</a>
+				{% if profile_user == request.user %}
+					| <a href="/remove_friend/{{friend.id}}/">Remove</a>
+				{% endif %}
+				</p>
+			{% endfor %}
+		</div>
+		<div>
+			{% if profile_user == request.user %}
+			<h1>Friend Requests:</h1>
+				<p>hey man</p>
+				{% for friend_request in user.receiver.all %}
+					<p><a href="{% url 'user_profile' friend_request.user.id %}">{{friend_request.user}}</a> <a href="/accept_friend_request/{{friend_request.id}}/"><img src="https://img.icons8.com/offices/24/000000/checkmark.png"/></a> <a href="/decline_friend_request/{{friend_request.id}}/"><img src="https://img.icons8.com/material/24/fa314a/xbox-x.png"/></a></p>
+				{% endfor %}
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock content %}
