@@ -9,7 +9,7 @@ from accounts.models import CustomUser
 def lobby_room(request, lobby_id):
     lobby = Lobby.objects.get(id=lobby_id)
     
-    if lobby.host == request.user or lobby.player == None:
+    if lobby.host == request.user or lobby.player == None or lobby.player == request.user:
         print(lobby.host.username, "is wack, really!")
         return render(request, 'lobby.html', {'lobby': lobby})
     else:

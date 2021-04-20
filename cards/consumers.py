@@ -17,6 +17,7 @@ class CardConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.id = self.scope['url_route']['kwargs']['lobby_id']
         ishost = await self.hostOrPlayer()
+        print(ishost)
         istaken = await self.takenSlot()
         if ishost:
             self.scope['_host_deck'] = self.user.decks
@@ -57,7 +58,7 @@ class CardConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def takenSlot(self):
         tPlayer = Lobby.objects.get(id=self.id).player
-        if tPlayer: print(tPlayer.username)
+        if tPlayer: print(tPlayer.username, self.user.username)
         if tPlayer == None: return False
         if tPlayer.id == self.user.id: return False
         return True
