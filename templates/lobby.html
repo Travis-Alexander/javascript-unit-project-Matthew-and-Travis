@@ -16,15 +16,16 @@ if (window.location.host == "127.0.0.1:8000")
 };
 var url = web_socket_type + window.location.host + '/ws/lobby/' + '{{ lobby.id }}/';
 var chatSocket = new WebSocket(url);
-var host_lp = 0;
+var host_lp = 0; // temporary holder when grabbing the host's actual LP
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
     document.getElementById("hostLP").innerText = data._host_lp;
-    host_lp = data._host_lp;
+    host_lp = data._host_lp; // when the user sends any request or joins a game, the temporary holder is initialized
 }
 
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
 remove_hp_from_host.addEventListener("click", function() {
+    //send all the modification code and actual value to the consumer to be processed
     chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`}))
 })
 </script>
