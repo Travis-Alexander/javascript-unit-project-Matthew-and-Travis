@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ lobby.host.username }}</h1>
+
+{% endblock content %}
+{% block domready %}
+<script type="text/javascript">
+var web_socket_type = "wss://";
+if (window.location.host == "127.0.0.1:8000")
+{
+    web_socket_type = "ws://";
+};
+var url = web_socket_type + window.location.host + '/ws/lobby/' + '{{ lobby.id }}/';
+console.log(url)
+var chatSocket = new WebSocket(url);
+</script>
+{% endblock %}

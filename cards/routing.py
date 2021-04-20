@@ -1,5 +1,5 @@
 from django.urls import re_path
-from .consumers import GameConsumer
+from .consumers import CardConsumer
 websocket_urlpatterns = [
-    re_path(r"ws/chat/room/(?P<room_id>\d+)/$", GameConsumer.as_asgi()),
+    re_path(r"ws/lobby/(?P<lobby_id>\d+)/$", CardConsumer.as_asgi()),
 ]
