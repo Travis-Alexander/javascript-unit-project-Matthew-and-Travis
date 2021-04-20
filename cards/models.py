@@ -18,6 +18,7 @@ class Lobby(models.Model):
     player = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="joined_lobby"
+        related_name="joined_lobby",
+        blank=True
     )
     win_state = models.PositiveIntegerField(blank=True) #0, host won. 1, client won. 2, draw.
