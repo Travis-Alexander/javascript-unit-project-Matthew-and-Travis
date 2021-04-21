@@ -50,26 +50,40 @@ chatSocket.onmessage = function(e) {
     player_hand = data._player_cards_in_hand;
     player_deck = data.host_cards_in_deck;
     gameState = data.gameState;
+
+    if (remove_hp_from_player != null){
+        if (gameState == 0 || gameState == 1){
+            remove_hp_from_player.disabled = false;
+        }else if (gameState == 2 || gameState == 3){
+            remove_hp_from_player.disabled = true;
+        }
+    }else {
+        if (gameState == 0 || gameState == 1){
+            remove_hp_from_host.disabled = true;
+        }else if (gameState == 2 || gameState == 3){
+            remove_hp_from_host.disabled = false ;
+        }
+    }
+
+
 }
 
 
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
 var remove_hp_from_player = document.querySelector("#remove-lp-from-player");
 
-remove_hp_from_host.disabled = true
 
+if ("{{ user.id }}" == "{{ lobby.player.id }}"){
 remove_hp_from_host.addEventListener("click", function() {
-    remove_hp_from_host.disabled = true
-    remove_hp_from_player.disabled = false
-    //send all the modification code and actual value to the consumer to be processed
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`}))
-})
 
+    //send all the modification code and actual value to the consumer to be processed
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`, "gameState": 1}))
+})
+}else if("{{ user.id }}" == "{{ lobby.host.id }}"){
 
 remove_hp_from_player.addEventListener("click", function(){
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`}))
-    remove_hp_from_host.disabled = false
-    remove_hp_from_player.disabled = true
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`, "gameState": 3}))
 })
+}
 </script>
 {% endblock %}
