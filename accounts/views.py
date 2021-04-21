@@ -3,6 +3,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser, FriendRequest
+from cards.models import Card
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
@@ -67,3 +68,12 @@ def RemoveFriend(request, userID):
     friend.friends.remove(user)
     messages.success(request, "Friend removed.")
     return redirect(f"/user/{request.user.id}")
+
+
+class DeckCustomization(ListView):
+    model = Card 
+    template_name = "deck.html"
+    
+    def get_queryset(self):
+        return Card.objects.all()
+    

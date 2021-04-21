@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for card in object_list %}
+<p>{{ card.name }}</p>
+{% endfor %} 
+
+{% endblock content %}
