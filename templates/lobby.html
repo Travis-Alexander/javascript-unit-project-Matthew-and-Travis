@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
-<h2 id="hostLP"></h2>
+<h2 id="LP"></h2>
 <p>Remove LP from the host</p>
 <input type="button" id="remove-lp-from-host">
 <!-- <input type="out"> -->
@@ -16,12 +16,32 @@ if (window.location.host == "127.0.0.1:8000")
 };
 var url = web_socket_type + window.location.host + '/ws/lobby/' + '{{ lobby.id }}/';
 var chatSocket = new WebSocket(url);
+
+var gameState = 0; /*
+    0 - Host's Main Phase
+    1 - Host's Battle Phase
+    2 - Player's Main Phase
+    3 - Player's Battle Phase
+*/
+
 var host_lp = 0; // temporary holder when grabbing the host's actual LP
+var player_lp = 0;
+var host_hand = null;
+var player_hand = null;
+var host_cards = null;
+var player_cards = null;
+
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
-    document.getElementById("hostLP").innerText = data._host_lp;
+    document.getElementById("LP").innerText = `Host's LP: ${data._host_lp}`;
     host_lp = data._host_lp; // when the user sends any request or joins a game, the temporary holder is initialized
+    player_lp = data._player_lp;
+    host_hand = data._host_cards_in_hand;
+    host_deck = data._host_cards_in_deck;
+    player_hand = data._player_cards_in_hand;
+    player_deck = data.host_cards_in_deck;
 }
+
 
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
 remove_hp_from_host.addEventListener("click", function() {

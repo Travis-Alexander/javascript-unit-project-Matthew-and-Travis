@@ -62,7 +62,17 @@ class CardConsumer(AsyncWebsocketConsumer):
         return Lobby.objects.get(id=self.id)
     @database_sync_to_async
     def querySetToList(self, query_set):
-        return list(query_set)
+        new_list = list()
+        for i in query_set:
+            new_card = dict()
+            new_card['attack'] = i.attack
+            new_card['health'] = i.health
+            new_card['defense'] = i.defense
+            new_card['card_art'] = i.card_art
+            new_card['effects'] = i.effects
+            new_card['level'] = i.level
+            new_list.append(new_card)
+        return new_list
     @database_sync_to_async
     def hostOrPlayer(self):
         return self.lobby.host.id == self.user.id
@@ -99,8 +109,14 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_host_lp': self.scope['_host_lp'],
                 '_host_deck': self.scope['_host_deck'],
                 '_host_cards_in_play': self.scope['_host_cards_in_play'],
-                '_host_cards_in_deck': self.scope['_host_cards_in_play'],
-                '_host_cards_in_discard': self.scope['_host_cards_in_play'],
-                '_host_cards_in_hand': self.scope['_host_cards_in_play'],
+                '_host_cards_in_deck': self.scope['_host_cards_in_deck'],
+                '_host_cards_in_discard': self.scope['_host_cards_in_discard'],
+                '_host_cards_in_hand': self.scope['_host_cards_in_hand'],
+                '_player_lp': self.scope['_player_lp'],
+                '_player_deck': self.scope['_player_deck'],
+                '_player_cards_in_play': self.scope['_player_cards_in_play'],
+                '_player_cards_in_deck': self.scope['_player_cards_in_deck'],
+                '_player_cards_in_discard': self.scope['_player_cards_in_discard'],
+                '_player_cards_in_hand': self.scope['_player_cards_in_hand'],
             }
         )
