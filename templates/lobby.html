@@ -77,6 +77,7 @@ var card_slot_2 = document.querySelector('#card-2');
 var card_slot_3 = document.querySelector('#card-3');
 var card_slot_4 = document.querySelector('#card-4');
 var card_slot_5 = document.querySelector('#card-5');
+var select_hand = null;
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
     if (data.initialization) {
@@ -113,20 +114,27 @@ chatSocket.onmessage = function(e) {
         my_hand.innerHTML = "";
         for(let i = 0; i < select_hand.length; i++) {
             if (select_hand[i] != null) {
-                my_hand.innerHTML += `<div style="padding-right: 1em;">
+                diiv = document.createElement("a")
+                diiv.style.padding = "1em";
+                diiv.innerHTML = `<div">
                     <h3>${select_hand[i]["name"]}</h3>
                     <p>Health: ${select_hand[i]["health"]}</p>
                     <p>Attack: ${select_hand[i]["attack"]}</p>
                     <p>Defense: ${select_hand[i]["defense"]}</p>
                     </div>`
+                diiv.addEventListener("click", PlaceCard(i));
+                my_hand.appendChild(diiv)
             }
         }
     }
     
 
 }
-
-
+function PlaceCard(identity) {
+    return function() {
+        console.log(identity);
+    };
+}
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
 var remove_hp_from_player = document.querySelector("#remove-lp-from-player");
 
