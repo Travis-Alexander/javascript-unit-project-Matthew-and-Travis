@@ -55,6 +55,7 @@ class CardConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'out',
                 '_host_lp': self.scope['_host_lp'],
+                '_player_lp': self.scope['_player_lp'],
             }
         )
     @database_sync_to_async
