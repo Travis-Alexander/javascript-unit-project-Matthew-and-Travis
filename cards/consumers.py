@@ -127,13 +127,13 @@ class CardConsumer(AsyncWebsocketConsumer):
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])
-                while i > 0 and self.scope['_host_cards_in_deck'] > 0:
+                while i > 0 and len(self.scope['_host_cards_in_deck']) > 0:
                     card = self.querySetToList([self.scope['_host_cards_in_deck'].pop()]) #weird list play, dw
                     self.scope['_host_cards_in_hand'].append(card[0])
                     i -= 1
             else:
                 i = int(text_data_json['value'])
-                while i > 0 and self.scope['_player_cards_in_deck'] > 0:
+                while i > 0 and len(self.scope['_player_cards_in_deck']) > 0:
                     card = self.querySetToList([self.scope['_player_cards_in_deck'].pop()])
                     self.scope['_player_cards_in_hand'].append(card[0])
                     i -= 1
