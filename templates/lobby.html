@@ -4,6 +4,7 @@
 <h2 id="LP"></h2>
 <p>Remove LP from the host</p>
 <input type="button" id="remove-lp-from-host">
+<input type="button" id="remove-lp-from-player">
 <!-- <input type="out"> -->
 {% endblock content %}
 {% block domready %}
@@ -48,5 +49,12 @@ remove_hp_from_host.addEventListener("click", function() {
     //send all the modification code and actual value to the consumer to be processed
     chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`}))
 })
+
+var remove_hp_from_player = document.querySelector("#remove-lp-from-player");
+remove_hp_from_player.addEventListener("click", function(){
+
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`}))
+})
+
 </script>
 {% endblock %}
