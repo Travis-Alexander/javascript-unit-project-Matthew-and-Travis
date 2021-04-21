@@ -105,6 +105,14 @@ class CardConsumer(AsyncWebsocketConsumer):
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
             elif text_data_json['target'] == "player":
                 self.scope['_player_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
+            else:
+                slot = int(text_data_json['target'])
+                if slot <= 2:
+                    self.scope['_host_cards_in_play'][slot]['health'] = (
+                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                    )
+                    if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
+                        self.scope['_host_cards_in_play'][slot] = None
         await self.channel_layer.group_send (
             self.room_group_name,
             {
