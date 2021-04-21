@@ -4,7 +4,7 @@ from django.utils import timezone
 from .models import Lobby, Card
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-
+from random import shuffle
 # Players:
 # Life Points, Deck reference, Cards in play, Cards in deck, Cards in discard, Cardss in hand
 #
@@ -64,6 +64,9 @@ class CardConsumer(AsyncWebsocketConsumer):
         return Lobby.objects.get(id=self.id)
     @database_sync_to_async
     def querySetToList(self, query_set):
+        """
+        Note that this function also shuffles the list
+        """
         new_list = list()
         for i in query_set:
             new_card = dict()
@@ -74,6 +77,7 @@ class CardConsumer(AsyncWebsocketConsumer):
             new_card['effects'] = i.effects
             new_card['level'] = i.level
             new_list.append(new_card)
+        shuffle(new_list)
         return new_list
     @database_sync_to_async
     def hostOrPlayer(self):
@@ -100,6 +104,7 @@ class CardConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         self.scope['gameState'] = text_data_json['gameState']
+        # more information on these can be found in the file "acts.md"
         if text_data_json["action"] == "attack":
             if text_data_json['target'] == "host":
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
@@ -113,6 +118,25 @@ class CardConsumer(AsyncWebsocketConsumer):
                     )
                     if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
                         self.scope['_host_cards_in_play'][slot] = None
+                else:
+                    self.scope['_player_cards_in_play'][slot-3]['health'] = (
+                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                    )
+                    if self.scope['_player_cards_in_play'][slot-3]['health'] <= 0:
+                        self.scope['_player_cards_in_play'][slot-3] = None
+        elif text_data_json['action'] == 'draw':
+            if text_data_json['actor'] == 'host':
+                i = int(text_data_json['value'])
+                while i > 0 and self.scope['_host_cards_in_deck'] > 0:
+                    card = self.querySetToList([self.scope['_host_cards_in_deck'].pop()]) #weird list play, dw
+                    self.scope['_host_cards_in_hand'].append(card[0])
+                    i -= 1
+            else:
+                i = int(text_data_json['value'])
+                while i > 0 and self.scope['_player_cards_in_deck'] > 0:
+                    card = self.querySetToList([self.scope['_player_cards_in_deck'].pop()])
+                    self.scope['_player_cards_in_hand'].append(card[0])
+                    i -= 1
         await self.channel_layer.group_send (
             self.room_group_name,
             {
