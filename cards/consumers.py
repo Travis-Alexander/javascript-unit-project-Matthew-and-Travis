@@ -31,7 +31,7 @@ class CardConsumer(AsyncWebsocketConsumer):
             self.scope['_player_deck'] = await self.querySetToList(self.user.decks.all())
             self.scope['_player_cards_in_deck'] = self.scope['_player_deck']
             await self.registerPlayer()
-        
+        self.scope['gameState'] = 1
         self.scope['_host_lp'] = 2000
             
         self.scope['_host_cards_in_play'] = None
@@ -56,6 +56,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                 'type': 'out',
                 '_host_lp': self.scope['_host_lp'],
                 '_player_lp': self.scope['_player_lp'],
+                'gameState': self.scope['gameState'],3
             }
         )
     @database_sync_to_async
@@ -98,6 +99,7 @@ class CardConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        self.scope['gameState'] = text_data_json['gameState']
         if text_data_json["action"] == "attack":
             if text_data_json['target'] == "host":
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
@@ -119,5 +121,6 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_player_cards_in_deck': self.scope['_player_cards_in_deck'],
                 '_player_cards_in_discard': self.scope['_player_cards_in_discard'],
                 '_player_cards_in_hand': self.scope['_player_cards_in_hand'],
+                'gameState': self.scope['gameState'],
             }
         )
