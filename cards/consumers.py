@@ -69,8 +69,16 @@ class CardConsumer(AsyncWebsocketConsumer):
         Note that this function also shuffles the list
         """
         new_list = list()
+        print("PAIN", query_set)
         for i in query_set:
-            new_card = dict()
+            new_card = {
+                'attack': 0,
+                'health': 0,
+                'defense': 0,
+                'card_art': 0,
+                'effects': None,
+                'level': 1,
+            }
             new_card['attack'] = i.attack
             new_card['health'] = i.health
             new_card['defense'] = i.defense
@@ -130,15 +138,23 @@ class CardConsumer(AsyncWebsocketConsumer):
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])
+                if self.scope['_host_cards_in_hand']:
+                    self.scope['_host_cards_in_hand'] = list(self.scope['_host_cards_in_hand'])
+                else:
+                    self.scope['_host_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_host_cards_in_deck']) > 0:
-                    card = self.querySetToList([self.scope['_host_cards_in_deck'].pop()]) #weird list play, dw
-                    self.scope['_host_cards_in_hand'].append(card[0])
+                    temp = self.scope['_host_cards_in_deck'].pop()
+                    self.scope['_host_cards_in_hand'].append(temp)
                     i -= 1
             else:
                 i = int(text_data_json['value'])
+                if self.scope['_player_cards_in_hand']:
+                    self.scope['_player_cards_in_hand'] = list(self.scope['_player_cards_in_hand'])
+                else:
+                    self.scope['_player_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_player_cards_in_deck']) > 0:
-                    card = self.querySetToList([self.scope['_player_cards_in_deck'].pop()])
-                    self.scope['_player_cards_in_hand'].append(card[0])
+                    temp = self.scope['_player_cards_in_deck'].pop()
+                    self.scope['_player_cards_in_hand'].append(temp)
                     i -= 1
         await self.channel_layer.group_send (
             self.room_group_name,

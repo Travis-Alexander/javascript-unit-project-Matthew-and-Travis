@@ -11,6 +11,37 @@
 <input type="button" id="remove-lp-from-host" value="Attack {{ lobby.host.username }}">
 {% endif %}
 
+{% if user.id == lobby.host.id %}
+<div>
+    <p id="card-3"></p>
+    <p id="card-4"></p>
+    <p id="card-5"></p>
+</div>
+<div>
+    <p id="card-0"></p>
+    <p id="card-1"></p>
+    <p id="card-2"></p>
+</div>
+{% else %}
+<div>
+    <p id="card-0"></p>
+    <p id="card-1"></p>
+    <p id="card-2"></p>
+</div>
+<div>
+    <p id="card-3"></p>
+    <p id="card-4"></p>
+    <p id="card-5"></p>
+</div>
+
+{% endif %}
+<div id="my-hand">
+
+</div>
+
+
+
+
 <!-- <input type="out"> -->
 {% endblock content %}
 {% block domready %}
@@ -38,8 +69,21 @@ var player_hand = null;
 var host_cards = null;
 var player_cards = null;
 
+var my_hand = document.querySelector('#my-hand');
+
+var card_slot_0 = document.querySelector('#card-0');
+var card_slot_1 = document.querySelector('#card-1');
+var card_slot_2 = document.querySelector('#card-2');
+var card_slot_3 = document.querySelector('#card-3');
+var card_slot_4 = document.querySelector('#card-4');
+var card_slot_5 = document.querySelector('#card-5');
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
+    if (data.initialization) {
+        var actor = "host";
+        if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"}
+        chatSocket.send(JSON.stringify({"action": "draw", "actor": actor, "value": 5, "gameState": 0}))
+    }
     document.getElementById("HOST_LP").innerText = `{{ lobby.host.username }}'s LP: ${data._host_lp}`;
     document.getElementById("PLAYER_LP").innerText = `{{ lobby.player.username }}'s LP: ${data._player_lp}`;
     host_lp = data._host_lp; // when the user sends any request or joins a game, the temporary holder is initialized
@@ -49,20 +93,31 @@ chatSocket.onmessage = function(e) {
     player_hand = data._player_cards_in_hand;
     player_deck = data.host_cards_in_deck;
     gameState = data.gameState;
+    
     if (remove_hp_from_player != null){
+        select_hand = host_hand;
         if (gameState == 0 || gameState == 1){
             remove_hp_from_player.disabled = false;
         }else if (gameState == 2 || gameState == 3){
             remove_hp_from_player.disabled = true;
         }
     }else {
+        select_hand = player_hand;
         if (gameState == 0 || gameState == 1){
             remove_hp_from_host.disabled = true;
         }else if (gameState == 2 || gameState == 3){
             remove_hp_from_host.disabled = false ;
         }
     }
-
+    if (select_hand) {
+        my_hand.innerHTML = "";
+        for(let i = 0; i < select_hand.length; i++) {
+            if (select_hand[i] != null) {
+                my_hand.innerHTML += `<div><h3>${select_hand[i]["attack"]}</h3></div>`
+            }
+        }
+    }
+    
 
 }
 
