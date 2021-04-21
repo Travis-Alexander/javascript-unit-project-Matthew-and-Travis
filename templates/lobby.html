@@ -42,16 +42,17 @@ chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
     document.getElementById("HOST_LP").innerText = `{{ lobby.host.username }}'s LP: ${data._host_lp}`;
     document.getElementById("PLAYER_LP").innerText = `{{ lobby.player.username }}'s LP: ${data._player_lp}`;
-    if (data.initialization) {
+    //if (data.initialization) {
         host_lp = data._host_lp; // when the user sends any request or joins a game, the temporary holder is initialized
         player_lp = data._player_lp;
-        console.log(player_lp, data._player_lp)
+        //console.log(player_lp, data._player_lp)
         host_hand = data._host_cards_in_hand;
         host_deck = data._host_cards_in_deck;
         player_hand = data._player_cards_in_hand;
         player_deck = data.host_cards_in_deck;
         gameState = data.gameState;
-    }
+    //}
+    console.log(data)
     if (remove_hp_from_player != null){
         if (gameState == 0 || gameState == 1){
             remove_hp_from_player.disabled = false;
@@ -78,12 +79,12 @@ if ("{{ user.id }}" == "{{ lobby.player.id }}"){
 remove_hp_from_host.addEventListener("click", function() {
 
     //send all the modification code and actual value to the consumer to be processed
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`, "gameState": 1}))
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`, "gameState": 1, "my_lp": `${player_lp}`}))
 })
 }else if("{{ user.id }}" == "{{ lobby.host.id }}"){
 
 remove_hp_from_player.addEventListener("click", function(){
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`, "gameState": 3}))
+    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`, "gameState": 3, "my_lp": `${host_lp}`}))
 })
 }
 </script>

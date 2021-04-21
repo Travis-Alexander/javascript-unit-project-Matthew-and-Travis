@@ -7,6 +7,7 @@ Attacks require the following keys:
 - "target", for picking out what entity to deal damage to.
 - "value", for defining how much damage to deal to said entity.
 - "cur_value", for remembering the target's current health
+- "my_lp", so clients don't forget their own LP
 ### "draw"
 Drawing a card(s) needs the following keys:
 - "actor", who is drawing the card

@@ -109,8 +109,10 @@ class CardConsumer(AsyncWebsocketConsumer):
         if text_data_json["action"] == "attack":
             if text_data_json['target'] == "host":
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
+                self.scope['_player_lp'] = int(text_data_json['my_lp'])
             elif text_data_json['target'] == "player":
                 self.scope['_player_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
+                self.scope['_host_lp'] = int(text_data_json['my_lp'])
             else:
                 slot = int(text_data_json['target'])
                 if slot <= 2:
