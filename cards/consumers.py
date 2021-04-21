@@ -79,6 +79,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                 'effects': None,
                 'level': 1,
             }
+            new_card['name'] = i.name
             new_card['attack'] = i.attack
             new_card['health'] = i.health
             new_card['defense'] = i.defense

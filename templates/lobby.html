@@ -35,7 +35,7 @@
 </div>
 
 {% endif %}
-<div id="my-hand">
+<div id="my-hand" style="display: flex;">
 
 </div>
 
@@ -113,7 +113,12 @@ chatSocket.onmessage = function(e) {
         my_hand.innerHTML = "";
         for(let i = 0; i < select_hand.length; i++) {
             if (select_hand[i] != null) {
-                my_hand.innerHTML += `<div><h3>${select_hand[i]["attack"]}</h3></div>`
+                my_hand.innerHTML += `<div style="padding-right: 1em;">
+                    <h3>${select_hand[i]["name"]}</h3>
+                    <p>Health: ${select_hand[i]["health"]}</p>
+                    <p>Attack: ${select_hand[i]["attack"]}</p>
+                    <p>Defense: ${select_hand[i]["defense"]}</p>
+                    </div>`
             }
         }
     }
