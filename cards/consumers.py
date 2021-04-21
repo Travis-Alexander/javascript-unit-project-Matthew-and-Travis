@@ -97,11 +97,11 @@ class CardConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(event))
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print("IN", text_data, text_data_json)
         if text_data_json["action"] == "attack":
             if text_data_json['target'] == "host":
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
-                print("LP", self.scope['_host_lp'])
+            elif text_data_json['target'] == "player":
+                self.scope['_player_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
         await self.channel_layer.group_send (
             self.room_group_name,
             {
