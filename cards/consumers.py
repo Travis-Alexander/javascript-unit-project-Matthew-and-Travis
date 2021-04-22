@@ -154,6 +154,8 @@ class CardConsumer(AsyncWebsocketConsumer):
         elif text_data_json['action'] == 'playcard':
             self.scope['_host_cards_in_play'] = text_data_json['host_field']
             self.scope['_player_cards_in_play'] = text_data_json['player_field']
+            self.scope['_host_cards_in_hand'] = text_data_json['host_hand']
+            self.scope['_player_cards_in_hand'] = text_data_json['player_hand']
             if text_data_json['actor'] == 'host':
                 self.scope['_host_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])
@@ -164,7 +166,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                 i = int(text_data_json['position'])
                 if not self.scope['_player_cards_in_play']: self.scope['_player_cards_in_play'] = list()
                 self.scope['_player_cards_in_play'].append(self.scope['_player_cards_in_hand'].pop(i))
-                
+
         await self.channel_layer.group_send (
             self.room_group_name,
             {
