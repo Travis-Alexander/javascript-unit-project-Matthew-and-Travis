@@ -12,3 +12,7 @@ Attacks require the following keys:
 Drawing a card(s) needs the following keys:
 - "actor", who is drawing the card
 - "value", how many cards will be drawn
+### "placecard"
+Playing a card on the field
+- "actor", who is playing the card
+- "position", the index of the card that is being played

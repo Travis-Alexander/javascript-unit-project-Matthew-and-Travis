@@ -18,7 +18,6 @@ class CardConsumer(AsyncWebsocketConsumer):
         self.id = self.scope['url_route']['kwargs']['lobby_id']
         self.lobby = await self.getLobby(self.id)
         ishost = await self.hostOrPlayer()
-        print(ishost)
         istaken = await self.takenSlot()
         if ishost:
             self.scope['_host_deck'] = await self.querySetToList(self.user.decks.all())
@@ -69,7 +68,6 @@ class CardConsumer(AsyncWebsocketConsumer):
         Note that this function also shuffles the list
         """
         new_list = list()
-        print("PAIN", query_set)
         for i in query_set:
             new_card = {
                 'attack': 0,
@@ -157,6 +155,15 @@ class CardConsumer(AsyncWebsocketConsumer):
                     temp = self.scope['_player_cards_in_deck'].pop()
                     self.scope['_player_cards_in_hand'].append(temp)
                     i -= 1
+        elif text_data_json['action'] == 'playcard':
+            if text_data_json['actor'] == 'host':
+                i = int(text_data_json['position'])
+                if not self.scope['_host_cards_in_play']: self.scope['_host_cards_in_play'] = list()
+                self.scope['_host_cards_in_play'].append(self.scope['_host_cards_in_hand'].pop(i))
+            else:
+                i = int(text_data_json['position'])
+                if not self.scope['_player_cards_in_play']: self.scope['_player_cards_in_play'] = list()
+                self.scope['_player_cards_in_play'].append(self.scope['_player_cards_in_hand'].pop(i))
         await self.channel_layer.group_send (
             self.room_group_name,
             {

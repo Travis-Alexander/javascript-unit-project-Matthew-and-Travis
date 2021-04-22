@@ -12,26 +12,14 @@
 {% endif %}
 
 {% if user.id == lobby.host.id %}
-<div>
-    <p id="card-3"></p>
-    <p id="card-4"></p>
-    <p id="card-5"></p>
+<div id="player-field" style="display: flex;">
 </div>
-<div>
-    <p id="card-0"></p>
-    <p id="card-1"></p>
-    <p id="card-2"></p>
+<div id="host-field" style="display: flex;">
 </div>
 {% else %}
-<div>
-    <p id="card-0"></p>
-    <p id="card-1"></p>
-    <p id="card-2"></p>
+<div id="host-field" style="display: flex;">
 </div>
-<div>
-    <p id="card-3"></p>
-    <p id="card-4"></p>
-    <p id="card-5"></p>
+<div id="player-field" style="display: flex;">
 </div>
 
 {% endif %}
@@ -70,6 +58,8 @@ var host_cards = null;
 var player_cards = null;
 
 var my_hand = document.querySelector('#my-hand');
+var host_html_field = document.querySelector("#host-field");
+var player_html_field = document.querySelector("#player-field");
 
 var card_slot_0 = document.querySelector('#card-0');
 var card_slot_1 = document.querySelector('#card-1');
@@ -78,6 +68,7 @@ var card_slot_3 = document.querySelector('#card-3');
 var card_slot_4 = document.querySelector('#card-4');
 var card_slot_5 = document.querySelector('#card-5');
 var select_hand = null;
+var select_field = null;
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
     if (data.initialization) {
@@ -91,8 +82,10 @@ chatSocket.onmessage = function(e) {
     player_lp = data._player_lp;
     host_hand = data._host_cards_in_hand;
     host_deck = data._host_cards_in_deck;
+    host_field = data._host_cards_in_play;
     player_hand = data._player_cards_in_hand;
     player_deck = data.host_cards_in_deck;
+    player_field = data._player_cards_in_play;
     gameState = data.gameState;
     
     if (remove_hp_from_player != null){
@@ -127,12 +120,32 @@ chatSocket.onmessage = function(e) {
             }
         }
     }
+    if (host_field) {
+        host_html_field.innerHTML = "";
+        for(let i = 0; i < host_field.length; i++) {
+            if (host_field[i] != null) {
+                diiv = document.createElement("a")
+                diiv.style.padding = "1em";
+                diiv.innerHTML = `<div">
+                    <h3>${host_field[i]["name"]}</h3>
+                    <p>Health: ${host_field[i]["health"]}</p>
+                    <p>Attack: ${host_field[i]["attack"]}</p>
+                    <p>Defense: ${host_field[i]["defense"]}</p>
+                    </div>`
+                //diiv.addEventListener("click", PlaceCard(i));
+                host_html_field.appendChild(diiv)
+            }
+        }
+    }
     
 
 }
 function PlaceCard(identity) {
     return function() {
-        console.log(identity);
+        var actor = "host";
+        var state = 1;
+        if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"; state=3;}
+        chatSocket.send(JSON.stringify({"action": "playcard", "actor": actor, "position": identity, "gameState": state}))
     };
 }
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
