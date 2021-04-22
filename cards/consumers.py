@@ -56,7 +56,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_host_lp': self.scope['_host_lp'],
                 '_player_lp': self.scope['_player_lp'],
                 'gameState': self.scope['gameState'],
-                'initialization': True,
+                'initialization': 'wedoinit',
             }
         )
     @database_sync_to_async
@@ -102,6 +102,14 @@ class CardConsumer(AsyncWebsocketConsumer):
         L = self.lobby
         L.player = self.user
         L.save()
+    @database_sync_to_async
+    def condenseList(self, l):
+        new_list = list()
+        for i in l:
+            new_list.append(i)
+        while len(new_list) < 3:
+            new_list.append(None)
+        return new_list
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard (
             self.room_group_name,
@@ -114,32 +122,45 @@ class CardConsumer(AsyncWebsocketConsumer):
         self.scope['gameState'] = text_data_json['gameState']
         # more information on these can be found in the file "acts.md"
         if text_data_json["action"] == "attack":
-            if text_data_json['target'] == "host":
+            if text_data_json['target'] == "host" or not self.scope['_host_cards_in_play']:
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
                 self.scope['_player_lp'] = int(text_data_json['my_lp'])
-            elif text_data_json['target'] == "player":
+            elif text_data_json['target'] == "player" or not self.scope['_player_cards_in_play']:
                 self.scope['_player_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
                 self.scope['_host_lp'] = int(text_data_json['my_lp'])
             else:
                 slot = int(text_data_json['target'])
                 if slot <= 2:
+                    if slot > 2: slot = 2
+                    while not self.scope['_host_cards_in_play'][slot]:
+                        print(slot, self.scope['_host_cards_in_play'])
+                        slot += 1
+                        if slot > 2:
+                            slot = 0
                     self.scope['_host_cards_in_play'][slot]['health'] = (
-                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                        int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
                         self.scope['_host_cards_in_play'][slot] = None
+                        self.scope['_host_cards_in_play'] = await self.condenseList(self.scope['_host_cards_in_play'])
                 else:
+                    print("SLOT", slot)
+                    if slot > 2: slot = 2
+                    while not self.scope['_player_cards_in_play'][slot-3]:
+                        print(slot, self.scope['_player_cards_in_play'])
+                        slot += 1
+                        if slot > 2:
+                            slot = 0
                     self.scope['_player_cards_in_play'][slot-3]['health'] = (
-                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                        int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_player_cards_in_play'][slot-3]['health'] <= 0:
                         self.scope['_player_cards_in_play'][slot-3] = None
+                        self.scope['_player_cards_in_play'] = await self.condenseList(self.scope['_player_cards_in_play'])
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])
-                if self.scope['_host_cards_in_hand']:
-                    self.scope['_host_cards_in_hand'] = list(self.scope['_host_cards_in_hand'])
-                else:
+                if not self.scope['_host_cards_in_hand']:
                     self.scope['_host_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_host_cards_in_deck']) > 0:
                     temp = self.scope['_host_cards_in_deck'].pop()
@@ -147,23 +168,28 @@ class CardConsumer(AsyncWebsocketConsumer):
                     i -= 1
             else:
                 i = int(text_data_json['value'])
-                if self.scope['_player_cards_in_hand']:
-                    self.scope['_player_cards_in_hand'] = list(self.scope['_player_cards_in_hand'])
-                else:
+                if not self.scope['_player_cards_in_hand']:
                     self.scope['_player_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_player_cards_in_deck']) > 0:
                     temp = self.scope['_player_cards_in_deck'].pop()
                     self.scope['_player_cards_in_hand'].append(temp)
                     i -= 1
         elif text_data_json['action'] == 'playcard':
+            self.scope['_host_cards_in_play'] = text_data_json['host_field']
+            self.scope['_player_cards_in_play'] = text_data_json['player_field']
+            self.scope['_host_cards_in_hand'] = text_data_json['host_hand']
+            self.scope['_player_cards_in_hand'] = text_data_json['player_hand']
             if text_data_json['actor'] == 'host':
+                self.scope['_host_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])
                 if not self.scope['_host_cards_in_play']: self.scope['_host_cards_in_play'] = list()
                 self.scope['_host_cards_in_play'].append(self.scope['_host_cards_in_hand'].pop(i))
             else:
+                self.scope['_player_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])
                 if not self.scope['_player_cards_in_play']: self.scope['_player_cards_in_play'] = list()
                 self.scope['_player_cards_in_play'].append(self.scope['_player_cards_in_hand'].pop(i))
+
         await self.channel_layer.group_send (
             self.room_group_name,
             {
@@ -181,5 +207,6 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_player_cards_in_discard': self.scope['_player_cards_in_discard'],
                 '_player_cards_in_hand': self.scope['_player_cards_in_hand'],
                 'gameState': self.scope['gameState'],
+                'initialization': 'NO',
             }
         )
