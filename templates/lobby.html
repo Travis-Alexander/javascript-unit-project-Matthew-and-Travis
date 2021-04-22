@@ -90,23 +90,29 @@ chatSocket.onmessage = function(e) {
     gameState = data.gameState;
     
     if (remove_hp_from_player != null){
-        select_hand = host_hand;
         if (gameState == 0 || gameState == 1){
             remove_hp_from_player.disabled = false;
         }else if (gameState == 2 || gameState == 3){
             remove_hp_from_player.disabled = true;
         }
     }else {
-        select_hand = player_hand;
         if (gameState == 0 || gameState == 1){
             remove_hp_from_host.disabled = true;
         }else if (gameState == 2 || gameState == 3){
             remove_hp_from_host.disabled = false ;
         }
     }
+    if ("{{ lobby.host.id }}" == "{{ user.id }}") {
+        select_hand = host_hand
+    }
+    else {
+        select_hand = player_hand
+    }
+    my_hand.innerHTML = "";
     if (select_hand) {
-        my_hand.innerHTML = "";
+        console.log("WHERE EVEN IS THIS GARBAGE COMING FROM?!?!?!??!?!?!??!", select_hand)
         for(let i = 0; i < select_hand.length; i++) {
+            
             if (select_hand[i] != null) {
                 diiv = document.createElement("a")
                 diiv.style.padding = "1em";
@@ -164,7 +170,7 @@ chatSocket.onmessage = function(e) {
 }
 function PlaceCard(identity) {
     return function() {
-        console.log("IN FUNC", host_field)
+        console.log("IN FUNC", host_hand, ", ", player_hand)
         var actor = "host";
         var state = 1;
         var expected_state = 0;
@@ -218,7 +224,7 @@ function Attack(identity, attack_power) {
                 if (!found_target) {
                     chatSocket.send(JSON.stringify({"action": "skip", "gameState": state}));
                 }
-                chatSocket.send(JSON.stringify({"action": "draw", "actor": "player", "value": 1, "gameState": state}))
+                //chatSocket.send(JSON.stringify({"action": "draw", "actor": "player", "value": 1, "gameState": state}))
             }
             else {
                 chatSocket.send(JSON.stringify(
@@ -253,7 +259,7 @@ function Attack(identity, attack_power) {
                 if (!found_target) {
                     chatSocket.send(JSON.stringify({"action": "skip", "gameState": state}));
                 }
-                chatSocket.send(JSON.stringify({"action": "draw", "actor": "host", "value": 1, "gameState": state}))
+                //chatSocket.send(JSON.stringify({"action": "draw", "actor": "host", "value": 1, "gameState": state}))
             }
             else {
                 chatSocket.send(JSON.stringify(
