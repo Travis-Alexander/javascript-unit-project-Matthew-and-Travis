@@ -12,14 +12,14 @@
 {% endif %}
 
 {% if user.id == lobby.host.id %}
-<div id="player-field" style="display: flex;">
+<div id="player-field" style="display: flex; background-color: rgb(209, 169, 169);">
 </div>
-<div id="host-field" style="display: flex;">
+<div id="host-field" style="display: flex; background-color: rgb(167, 181, 221);">
 </div>
 {% else %}
-<div id="host-field" style="display: flex;">
+<div id="host-field" style="display: flex; background-color: rgb(209, 169, 169);">
 </div>
-<div id="player-field" style="display: flex;">
+<div id="player-field" style="display: flex; background-color: rgb(167, 181, 221);">
 </div>
 
 {% endif %}
@@ -132,8 +132,29 @@ chatSocket.onmessage = function(e) {
                     <p>Attack: ${host_field[i]["attack"]}</p>
                     <p>Defense: ${host_field[i]["defense"]}</p>
                     </div>`
-                //diiv.addEventListener("click", PlaceCard(i));
+                if ("{{ lobby.host.id }}" == "{{ user.id }}")  {
+                    diiv.addEventListener("click", Attack(i, host_field[i]["attack"]));
+                }
                 host_html_field.appendChild(diiv)
+            }
+        }
+    }
+    if (player_field) {
+        player_html_field.innerHTML = "";
+        for(let i = 0; i < player_field.length; i++) {
+            if (player_field[i] != null) {
+                diiv = document.createElement("a")
+                diiv.style.padding = "1em";
+                diiv.innerHTML = `<div">
+                    <h3>${player_field[i]["name"]}</h3>
+                    <p>Health: ${player_field[i]["health"]}</p>
+                    <p>Attack: ${player_field[i]["attack"]}</p>
+                    <p>Defense: ${player_field[i]["defense"]}</p>
+                    </div>`
+                if ("{{ lobby.host.id }}" !== "{{ user.id }}")  {
+                    diiv.addEventListener("click", Attack(i, player_field[i]["attack"]));
+                }
+                player_html_field.appendChild(diiv)
             }
         }
     }
@@ -144,9 +165,95 @@ function PlaceCard(identity) {
     return function() {
         var actor = "host";
         var state = 1;
-        if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"; state=3;}
-        chatSocket.send(JSON.stringify({"action": "playcard", "actor": actor, "position": identity, "gameState": state}))
+        var expected_state = 0;
+        var temp = `${host_lp}`;
+        if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"; state=3; expected_state = 2; temp = `${player_lp}`}
+        if (gameState == expected_state) {
+            chatSocket.send(JSON.stringify({"action": "playcard", "actor": actor, "position": identity, "gameState": state, "my_lp": temp}))
+        }
     };
+}
+function Attack(identity, attack_power) {
+    return function() {
+        var actor = "host";
+        var state = 2;
+        var expected_state = 1;
+        var default_target = "player";
+        if ("{{ lobby.host.id }}" !== "{{ user.id }}") {
+            actor="player";
+            state=0;
+            expected_state = 3;
+            default_target = "host";
+        }
+        if (gameState == expected_state && default_target == "player") {
+            if (player_field && player_field.length > 0) {
+                let found_target = false;
+                for (let i = 0; i < player_field.length; i++) {
+                    console.log(player_field)
+                    if (parseInt(player_field[i]['defense']) < attack_power) {
+                        found_target = true;
+                        chatSocket.send(JSON.stringify(
+                            {
+                                "action": "attack",
+                                "target": i+3,
+                                "value": attack_power,
+                                "cur_value": `${parseInt(player_field[i]['health'])}`,
+                                "gameState": state,
+                                "my_lp": `${player_lp}`
+                            }));
+                        break;
+                    }
+                }
+                if (!found_target) {
+                    chatSocket.send(JSON.stringify({"gameState": state}));
+                }
+            }
+            else {
+                chatSocket.send(JSON.stringify(
+                    {
+                        "action": "attack",
+                        "target": default_target,
+                        "value": attack_power,
+                        "cur_value": `${player_lp}`,
+                        "gameState": state,
+                        "my_lp": `${host_lp}`
+                    }));
+            }
+        }
+        if (gameState == expected_state && default_target == "host") {
+            if (host_field && host_field.length > 0) {
+                let found_target = false;
+                for (let i = 0; i < host_field.length; i++) {
+                    if (parseInt(host_field[i]['defense']) < attack_power) {
+                        found_target = true;
+                        chatSocket.send(JSON.stringify(
+                            {
+                                "action": "attack",
+                                "target": i,
+                                "value": attack_power,
+                                "cur_value": `${parseInt(host_field[i]['health'])}`,
+                                "gameState": state,
+                                "my_lp": `${host_lp}`
+                            }));
+                    }
+                }
+                if (!found_target) {
+                    chatSocket.send(JSON.stringify({"gameState": state}));
+                }
+            }
+            else {
+                chatSocket.send(JSON.stringify(
+                    {
+                        "action": "attack",
+                        "target": default_target,
+                        "value": attack_power,
+                        "cur_value": `${host_lp}`,
+                        "gameState": state,
+                        "my_lp": `${player_lp}`
+                    }));
+            }
+        }
+    }
 }
 var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
 var remove_hp_from_player = document.querySelector("#remove-lp-from-player");

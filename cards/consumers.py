@@ -157,10 +157,12 @@ class CardConsumer(AsyncWebsocketConsumer):
                     i -= 1
         elif text_data_json['action'] == 'playcard':
             if text_data_json['actor'] == 'host':
+                self.scope['_host_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])
                 if not self.scope['_host_cards_in_play']: self.scope['_host_cards_in_play'] = list()
                 self.scope['_host_cards_in_play'].append(self.scope['_host_cards_in_hand'].pop(i))
             else:
+                self.scope['_player_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])
                 if not self.scope['_player_cards_in_play']: self.scope['_player_cards_in_play'] = list()
                 self.scope['_player_cards_in_play'].append(self.scope['_player_cards_in_hand'].pop(i))
