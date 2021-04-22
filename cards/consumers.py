@@ -102,6 +102,14 @@ class CardConsumer(AsyncWebsocketConsumer):
         L = self.lobby
         L.player = self.user
         L.save()
+    @database_sync_to_async
+    def condenseList(self, l):
+        new_list = list()
+        for i in l:
+            new_list.append(i)
+        while len(new_list) < 3:
+            new_list.append(None)
+        return new_list
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard (
             self.room_group_name,
@@ -128,12 +136,14 @@ class CardConsumer(AsyncWebsocketConsumer):
                     )
                     if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
                         self.scope['_host_cards_in_play'][slot] = None
+                        self.scope['_host_cards_in_play'] = await self.condenseList(self.scope['_host_cards_in_play'])
                 else:
                     self.scope['_player_cards_in_play'][slot-3]['health'] = (
                         int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_player_cards_in_play'][slot-3]['health'] <= 0:
                         self.scope['_player_cards_in_play'][slot-3] = None
+                        self.scope['_player_cards_in_play'] = await self.condenseList(self.scope['_player_cards_in_play'])
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])
