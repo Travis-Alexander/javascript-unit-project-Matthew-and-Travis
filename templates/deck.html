@@ -1,19 +1,65 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %} {% for card in object_list %}
+<div>
+  <p style="color: red; font-size: larger" class="limit"></p>
+  <p
+    >{{ card.name }}
+    <input type="button" name="{{ card.pk }}" id="add" value="add" />
+    <input type="button" id="remove" name="{{ card.pk }}" value="remove" />
+  </p>
+</div>
+{% endfor %}
+<input type="button" id="save_deck" value="Save" />
 
-{% block content %}
+<script>
+  const addCard = document.querySelectorAll("#add");
+  const removeCard = document.querySelectorAll("#remove");
+  const deck = new Set();
+  const removeFromDeck = new Set();
+  const saveDeck = document.querySelector("#save_deck");
+  const warning = document.querySelector(".limit");
+  const min = 1;
+  const max = 1;
 
-{% for card in object_list %}
-<p>{{ card.name }}</p>
-<input type="checkbox" id="card" name="Card" value="{{ card.name }}">
-{% endfor %} 
+  for (let i = 0; i < addCard.length; i++) {
+    addCard[i].addEventListener("click", () => {
+      deck.add(addCard[i].name);
+      removeFromDeck.delete(addCard[i].name);
+      console.log(addCard[i].name);
+      
+    });
+  }
 
-<!-- <script>
-('input[type=checkbox]').on('change', function (e) {
-    if ($('input[type=checkbox]:checked').length > 1) {
-        $(this).prop('checked', false);
-        alert("allowed only 1");
+  for (let i = 0; i < removeCard.length; i++) {
+    removeCard[i].addEventListener("click", () => {
+      deck.delete(removeCard[i].name);
+      removeFromDeck.add(removeCard[i].name)
+    
+    });
+  }
+
+  saveDeck.addEventListener("click", () => {
+    console.log(deck.size);
+    if (deck.size > max) {
+      warning.innerText = `You must remove ${deck.size - max} cards!`;
+    } else if (deck.size < min) {
+      warning.innerText = `You must add ${min - deck.size} cards`;
+    } else {
+        warning.innerHTML = ''
+        console.log(deck);
+
+      fetch("/customize_deck", {
+          method: "POST",
+          body: JSON.stringify({
+              cards_to_add : Array.from(deck),
+              cards_to_remove : Array.from(removeFromDeck)
+          }),
+          headers: {
+              "Content-Type": "application/json"
+          }
+        }
+        ).then(() => console.log("Deck Updated!"))
     }
 });
-</script> -->
+</script>
 
 {% endblock content %}

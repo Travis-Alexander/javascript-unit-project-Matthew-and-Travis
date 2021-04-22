@@ -31,6 +31,8 @@
 				{% for friend_request in user.receiver.all %}
 					<p><a href="{% url 'user_profile' friend_request.user.id %}">{{friend_request.user}}</a> <a href="/accept_friend_request/{{friend_request.id}}/"><img src="https://img.icons8.com/offices/24/000000/checkmark.png"/></a> <a href="/decline_friend_request/{{friend_request.id}}/"><img src="https://img.icons8.com/material/24/fa314a/xbox-x.png"/></a></p>
 				{% endfor %}
+				<br>
+			<h1>Cards: </h1>
 			{% endif %}
 		</div>
 	</div>

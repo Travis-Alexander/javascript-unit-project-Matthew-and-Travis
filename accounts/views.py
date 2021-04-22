@@ -69,6 +69,14 @@ def RemoveFriend(request, userID):
     messages.success(request, "Friend removed.")
     return redirect(f"/user/{request.user.id}")
 
+def UpdateDeck(request):
+    user = request.user
+    updates = json.loads(request.body)
+    for card_to_add in updates['cards_to_add']:
+        user.decks.add(Card.get(id=card))
+        
+    for card_to_remove in updates['cards_to_remove']:
+        user.decks.remove(Card.get(id=card))
 
 class DeckCustomization(ListView):
     model = Card 
