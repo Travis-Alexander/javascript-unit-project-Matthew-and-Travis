@@ -56,6 +56,8 @@ var host_hand = null;
 var player_hand = null;
 var host_cards = null;
 var player_cards = null;
+var host_field = null;
+var player_field = null;
 
 var my_hand = document.querySelector('#my-hand');
 var host_html_field = document.querySelector("#host-field");
@@ -72,9 +74,8 @@ var select_field = null;
 chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
     if (data.initialization) {
-        var actor = "host";
-        if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"}
-        chatSocket.send(JSON.stringify({"action": "draw", "actor": actor, "value": 5, "gameState": 0}))
+        chatSocket.send(JSON.stringify({"action": "draw", "actor": "player", "value": 3, "gameState": 0}))
+        chatSocket.send(JSON.stringify({"action": "draw", "actor": "host", "value": 3, "gameState": 0}))
     }
     document.getElementById("HOST_LP").innerText = `{{ lobby.host.username }}'s LP: ${data._host_lp}`;
     document.getElementById("PLAYER_LP").innerText = `{{ lobby.player.username }}'s LP: ${data._player_lp}`;
@@ -120,8 +121,8 @@ chatSocket.onmessage = function(e) {
             }
         }
     }
+    host_html_field.innerHTML = "";
     if (host_field) {
-        host_html_field.innerHTML = "";
         for(let i = 0; i < host_field.length; i++) {
             if (host_field[i] != null) {
                 diiv = document.createElement("a")
@@ -139,8 +140,8 @@ chatSocket.onmessage = function(e) {
             }
         }
     }
+    player_html_field.innerHTML = "";
     if (player_field) {
-        player_html_field.innerHTML = "";
         for(let i = 0; i < player_field.length; i++) {
             if (player_field[i] != null) {
                 diiv = document.createElement("a")
@@ -163,13 +164,22 @@ chatSocket.onmessage = function(e) {
 }
 function PlaceCard(identity) {
     return function() {
+        console.log("IN FUNC", host_field)
         var actor = "host";
         var state = 1;
         var expected_state = 0;
         var temp = `${host_lp}`;
         if ("{{ lobby.host.id }}" !== "{{ user.id }}") { actor="player"; state=3; expected_state = 2; temp = `${player_lp}`}
         if (gameState == expected_state) {
-            chatSocket.send(JSON.stringify({"action": "playcard", "actor": actor, "position": identity, "gameState": state, "my_lp": temp}))
+            chatSocket.send(JSON.stringify({
+                "action": "playcard", 
+                "actor": actor, 
+                "position": identity, 
+                "gameState": state, 
+                "my_lp": temp, 
+                "player_field": player_field,
+                "host_field": host_field,
+            }))
         }
     };
 }
@@ -185,12 +195,12 @@ function Attack(identity, attack_power) {
             expected_state = 3;
             default_target = "host";
         }
-        if (gameState == expected_state && default_target == "player") {
+        if ((gameState == expected_state || gameState == expected_state - 1) && default_target == "player") {
             if (player_field && player_field.length > 0) {
+                console.log("Queueing to attack...")
                 let found_target = false;
                 for (let i = 0; i < player_field.length; i++) {
-                    console.log(player_field)
-                    if (parseInt(player_field[i]['defense']) < attack_power) {
+                    if (player_field[i] && parseInt(player_field[i]['defense']) < attack_power) {
                         found_target = true;
                         chatSocket.send(JSON.stringify(
                             {
@@ -198,6 +208,7 @@ function Attack(identity, attack_power) {
                                 "target": i+3,
                                 "value": attack_power,
                                 "cur_value": `${parseInt(player_field[i]['health'])}`,
+                                "defense": `${parseInt(player_field[i]['defense'])}`,
                                 "gameState": state,
                                 "my_lp": `${player_lp}`
                             }));
@@ -205,8 +216,9 @@ function Attack(identity, attack_power) {
                     }
                 }
                 if (!found_target) {
-                    chatSocket.send(JSON.stringify({"gameState": state}));
+                    chatSocket.send(JSON.stringify({"action": "skip", "gameState": state}));
                 }
+                chatSocket.send(JSON.stringify({"action": "draw", "actor": "player", "value": 1, "gameState": state}))
             }
             else {
                 chatSocket.send(JSON.stringify(
@@ -220,11 +232,11 @@ function Attack(identity, attack_power) {
                     }));
             }
         }
-        if (gameState == expected_state && default_target == "host") {
+        if ((gameState == expected_state || gameState == expected_state - 1) && default_target == "host") {
             if (host_field && host_field.length > 0) {
                 let found_target = false;
                 for (let i = 0; i < host_field.length; i++) {
-                    if (parseInt(host_field[i]['defense']) < attack_power) {
+                    if (host_field[i] && parseInt(host_field[i]['defense']) < attack_power) {
                         found_target = true;
                         chatSocket.send(JSON.stringify(
                             {
@@ -232,14 +244,16 @@ function Attack(identity, attack_power) {
                                 "target": i,
                                 "value": attack_power,
                                 "cur_value": `${parseInt(host_field[i]['health'])}`,
+                                "defense": `${parseInt(host_field[i]['defense'])}`,
                                 "gameState": state,
                                 "my_lp": `${host_lp}`
                             }));
                     }
                 }
                 if (!found_target) {
-                    chatSocket.send(JSON.stringify({"gameState": state}));
+                    chatSocket.send(JSON.stringify({"action": "skip", "gameState": state}));
                 }
+                chatSocket.send(JSON.stringify({"action": "draw", "actor": "host", "value": 1, "gameState": state}))
             }
             else {
                 chatSocket.send(JSON.stringify(

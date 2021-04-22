@@ -124,13 +124,13 @@ class CardConsumer(AsyncWebsocketConsumer):
                 slot = int(text_data_json['target'])
                 if slot <= 2:
                     self.scope['_host_cards_in_play'][slot]['health'] = (
-                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                        int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
                         self.scope['_host_cards_in_play'][slot] = None
                 else:
                     self.scope['_player_cards_in_play'][slot-3]['health'] = (
-                        int(text_data_json['cur_value']) - int(text_data_json['value'])
+                        int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_player_cards_in_play'][slot-3]['health'] <= 0:
                         self.scope['_player_cards_in_play'][slot-3] = None
@@ -156,6 +156,8 @@ class CardConsumer(AsyncWebsocketConsumer):
                     self.scope['_player_cards_in_hand'].append(temp)
                     i -= 1
         elif text_data_json['action'] == 'playcard':
+            self.scope['_host_cards_in_play'] = text_data_json['host_field']
+            self.scope['_player_cards_in_play'] = text_data_json['player_field']
             if text_data_json['actor'] == 'host':
                 self.scope['_host_lp'] = int(text_data_json['my_lp'])
                 i = int(text_data_json['position'])

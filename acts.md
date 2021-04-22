@@ -8,6 +8,7 @@ Attacks require the following keys:
 - "value", for defining how much damage to deal to said entity.
 - "cur_value", for remembering the target's current health
 - "my_lp", so clients don't forget their own LP
+- "defense", only pass in when a card is being attacked
 ### "draw"
 Drawing a card(s) needs the following keys:
 - "actor", who is drawing the card
