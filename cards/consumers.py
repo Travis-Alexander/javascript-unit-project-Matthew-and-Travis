@@ -56,7 +56,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_host_lp': self.scope['_host_lp'],
                 '_player_lp': self.scope['_player_lp'],
                 'gameState': self.scope['gameState'],
-                'initialization': True,
+                'initialization': 'wedoinit',
             }
         )
     @database_sync_to_async
@@ -137,9 +137,7 @@ class CardConsumer(AsyncWebsocketConsumer):
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])
-                if self.scope['_host_cards_in_hand']:
-                    self.scope['_host_cards_in_hand'] = list(self.scope['_host_cards_in_hand'])
-                else:
+                if not self.scope['_host_cards_in_hand']:
                     self.scope['_host_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_host_cards_in_deck']) > 0:
                     temp = self.scope['_host_cards_in_deck'].pop()
@@ -147,9 +145,7 @@ class CardConsumer(AsyncWebsocketConsumer):
                     i -= 1
             else:
                 i = int(text_data_json['value'])
-                if self.scope['_player_cards_in_hand']:
-                    self.scope['_player_cards_in_hand'] = list(self.scope['_player_cards_in_hand'])
-                else:
+                if not self.scope['_player_cards_in_hand']:
                     self.scope['_player_cards_in_hand'] = list()
                 while i > 0 and len(self.scope['_player_cards_in_deck']) > 0:
                     temp = self.scope['_player_cards_in_deck'].pop()
@@ -185,5 +181,6 @@ class CardConsumer(AsyncWebsocketConsumer):
                 '_player_cards_in_discard': self.scope['_player_cards_in_discard'],
                 '_player_cards_in_hand': self.scope['_player_cards_in_hand'],
                 'gameState': self.scope['gameState'],
+                'initialization': 'NO',
             }
         )
