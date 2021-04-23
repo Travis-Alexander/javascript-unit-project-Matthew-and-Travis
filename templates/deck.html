@@ -24,7 +24,7 @@
     addCard[i].addEventListener("click", () => {
       deck.add(addCard[i].name);
       removeFromDeck.delete(addCard[i].name);
-      console.log(addCard[i].name);
+
       
     });
   }
@@ -38,7 +38,6 @@
   }
 
   saveDeck.addEventListener("click", () => {
-    console.log(deck.size);
     if (deck.size > max) {
       warning.innerText = `You must remove ${deck.size - max} cards!`;
     } else if (deck.size < min) {
@@ -47,7 +46,7 @@
         warning.innerHTML = ''
         console.log(deck);
 
-      fetch("/customize_deck", {
+      fetch("/customize_deck/", {
           method: "POST",
           body: JSON.stringify({
               cards_to_add : Array.from(deck),

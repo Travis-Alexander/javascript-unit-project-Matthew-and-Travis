@@ -23,7 +23,7 @@ from accounts.views import (
     RemoveFriend,
     SendFriendRequest,
     UserProfile,
-    DeckCustomization
+    UpdateDeck
 )
 
 urlpatterns = [
@@ -37,5 +37,5 @@ urlpatterns = [
     path("accept_friend_request/<int:requestID>/", AcceptFriendRequest, name="accept_friend_request",),
     path("decline_friend_request/<int:requestID>/", DeclineFriendRequest, name="decline_friend_request",),
     path("remove_friend/<int:userID>/", RemoveFriend, name="remove_friend"),
-    path("customize_deck/", DeckCustomization.as_view(), name="deck_customization")
+    path("customize_deck/", UpdateDeck, name="deck_customization")
 ]

@@ -7,6 +7,8 @@ from cards.models import Card
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+import json
 
 
 # Create your views here.
@@ -69,9 +71,12 @@ def RemoveFriend(request, userID):
     messages.success(request, "Friend removed.")
     return redirect(f"/user/{request.user.id}")
 
+@csrf_exempt
 def UpdateDeck(request):
     user = request.user
-    updates = json.loads(request.body)
+    print(user)
+    print(request)
+    updates = json.load(request.body)
     for card_to_add in updates['cards_to_add']:
         user.decks.add(Card.get(id=card))
         
