@@ -74,14 +74,17 @@ def RemoveFriend(request, userID):
 @csrf_exempt
 def UpdateDeck(request):
     user = request.user
-    print(user)
-    print(request)
-    updates = json.load(request.body)
+    print(request.user)
+    print(request.body.decode())
+    updates = json.loads(request.body)
     for card_to_add in updates['cards_to_add']:
-        user.decks.add(Card.get(id=card))
+        print(card_to_add)
+        user.decks.add(card_to_add)
         
     for card_to_remove in updates['cards_to_remove']:
-        user.decks.remove(Card.get(id=card))
+        user.decks.remove(card_to_remove)
+    
+    return redirect(f'/customize_deck/')
 
 class DeckCustomization(ListView):
     model = Card 
