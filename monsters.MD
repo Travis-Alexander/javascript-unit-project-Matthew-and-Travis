@@ -2,7 +2,7 @@ Actual Stats
 -------------------------------------------------------------------------
 Name                   | LV |  HP  |  ATK  |  DEF  | Special Effect(s)
 -------------------------------------------------------------------------
-Giant                  | 3  | 450  |  500 |  0    |
+Giant                  | 2  | 450  |  500 |  0    |
 Great Golem of Saering | 3  | 800  |  300  |  200  | Play one "Knight of Saering" when this is destroyed
 Knight of Saering      | 2  | 550  |  300  |  100  |
 Witch of Saering       | 1  | 300  |  400  |  50   |
