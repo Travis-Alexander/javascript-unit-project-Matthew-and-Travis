@@ -6,9 +6,16 @@
 {% if user.is_authenticated %}
     HI! {{ user.username }}
     <p><a href="{% url 'logout' %}">Log out</a></p>
+    <p><a href="{% url 'new_lobby' %}">Create New Lobby</a></p>
+    <p><a href="{% url 'deck_customization' %}">Customize Deck</a></p>
 {% else %}
 <p>You are not logged in </p>
 <a href="{% url 'login' %}">Log In</a>
 <a href="{% url 'signup' %}">Sign Up</a>
 {% endif %}
+<h4>Games you are currently in:</h4>
+{% for lobby in object_list %}
+<a href="{% url 'lobby' lobby.id %}">{{ lobby }}</a>
+<br>
+{% endfor %}
 {% endblock content %}

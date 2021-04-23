@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
-from .views import lobby_room
+from .views import lobby_room, HomeView
 from cards.views import StartNewLobby
 from accounts.views import (
     AcceptFriendRequest,
@@ -33,7 +33,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('lobby/<int:lobby_id>/', lobby_room, name="lobby"),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('', HomeView.as_view(), name='home'),
     path('user/<int:pk>', UserProfile.as_view(), name="user_profile"),
     path('send_friend_request/<int:userID>/', SendFriendRequest, name="send_friend_request",),
     path("accept_friend_request/<int:requestID>/", AcceptFriendRequest, name="accept_friend_request",),

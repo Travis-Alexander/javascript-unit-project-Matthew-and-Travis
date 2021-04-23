@@ -28,3 +28,5 @@ class Lobby(models.Model):
         null=True
     )
     win_state = models.PositiveIntegerField(blank=True, null=True) #0, host won. 1, client won. 2, draw.
+    def __str__(self):
+        return f"{self.host.username} vs. {self.player.username}"
