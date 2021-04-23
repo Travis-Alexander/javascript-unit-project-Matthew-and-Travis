@@ -22,12 +22,6 @@
 <p>Remove LP from the host</p>
 
 {% if user.id == lobby.host.id %}
-<input type="button" id="remove-lp-from-player" value="Attack {{ lobby.player.username }}">
-{% else %}
-<input type="button" id="remove-lp-from-host" value="Attack {{ lobby.host.username }}">
-{% endif %}
-
-{% if user.id == lobby.host.id %}
 <div id="player-field" style="display: flex; background-color: rgb(209, 169, 169);">
 </div>
 <div id="host-field" style="display: flex; background-color: rgb(167, 181, 221);">
@@ -106,19 +100,6 @@ chatSocket.onmessage = function(e) {
     player_field = data._player_cards_in_play;
     gameState = data.gameState;
     
-    if (remove_hp_from_player != null){
-        if (gameState == 0 || gameState == 1){
-            remove_hp_from_player.disabled = false;
-        }else if (gameState == 2 || gameState == 3){
-            remove_hp_from_player.disabled = true;
-        }
-    }else {
-        if (gameState == 0 || gameState == 1){
-            remove_hp_from_host.disabled = true;
-        }else if (gameState == 2 || gameState == 3){
-            remove_hp_from_host.disabled = false ;
-        }
-    }
     if ("{{ lobby.host.id }}" == "{{ user.id }}") {
         select_hand = host_hand
     }
@@ -342,21 +323,6 @@ function Attack(identity, attack_power) {
         }
     }
 }
-var remove_hp_from_host = document.querySelector("#remove-lp-from-host");
-var remove_hp_from_player = document.querySelector("#remove-lp-from-player");
 
-
-if ("{{ user.id }}" == "{{ lobby.player.id }}"){
-remove_hp_from_host.addEventListener("click", function() {
-
-    //send all the modification code and actual value to the consumer to be processed
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "host", "value": "50", "cur_value": `${host_lp}`, "gameState": 1, "my_lp": `${player_lp}`}))
-})
-}else if("{{ user.id }}" == "{{ lobby.host.id }}"){
-
-remove_hp_from_player.addEventListener("click", function(){
-    chatSocket.send(JSON.stringify({"action": "attack", "target": "player", "value": "50", "cur_value": `${player_lp}`, "gameState": 3, "my_lp": `${host_lp}`}))
-})
-}
 </script>
 {% endblock %}
