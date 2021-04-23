@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'main.css' %}"
 <h1>{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
 <h2 id="HOST_LP"></h2>
 <h2 id="PLAYER_LP"></h2>
@@ -42,6 +44,7 @@ if (window.location.host == "127.0.0.1:8000")
 };
 var url = web_socket_type + window.location.host + '/ws/lobby/' + '{{ lobby.id }}/';
 var chatSocket = new WebSocket(url);
+
 
 var gameState = 0; /*
     0 - Host's Main Phase
@@ -110,19 +113,32 @@ chatSocket.onmessage = function(e) {
     }
     my_hand.innerHTML = "";
     if (select_hand) {
-        console.log("WHERE EVEN IS THIS GARBAGE COMING FROM?!?!?!??!?!?!??!", select_hand)
         for(let i = 0; i < select_hand.length; i++) {
             
             if (select_hand[i] != null) {
                 diiv = document.createElement("a")
                 diiv.style.padding = "1em";
-                diiv.innerHTML = `<div">
+                inner = document.createElement("div")
+                inner.classList.add("card")
+                inner.innerHTML = `
                     <h3>${select_hand[i]["name"]}</h3>
                     <p>Health: ${select_hand[i]["health"]}</p>
                     <p>Attack: ${select_hand[i]["attack"]}</p>
                     <p>Defense: ${select_hand[i]["defense"]}</p>
-                    </div>`
+                    `;
+                inner.addEventListener("mousemove", function(event) {
+                    const y = event.offsetY - 180,
+                    xRotation = y / -360,
+                    x = event.offsetX - 180,
+                    yRotation = x / 360,
+                    brightness = (Math.abs(-360 + x + y) / 360) + .5;
+                    this.style.setProperty('--x-rotation', xRotation + 'rad');
+                    this.style.setProperty('--y-rotation', yRotation + 'rad');
+                    this.style.setProperty('--brightness', brightness);
+                });
+                diiv.appendChild(inner);
                 diiv.addEventListener("click", PlaceCard(i));
+                
                 my_hand.appendChild(diiv)
             }
         }
@@ -133,12 +149,25 @@ chatSocket.onmessage = function(e) {
             if (host_field[i] != null) {
                 diiv = document.createElement("a")
                 diiv.style.padding = "1em";
-                diiv.innerHTML = `<div">
+                inner = document.createElement("div")
+                inner.classList.add("card")
+                inner.innerHTML = `
                     <h3>${host_field[i]["name"]}</h3>
                     <p>Health: ${host_field[i]["health"]}</p>
                     <p>Attack: ${host_field[i]["attack"]}</p>
                     <p>Defense: ${host_field[i]["defense"]}</p>
-                    </div>`
+                    `;
+                inner.addEventListener("mousemove", function(event) {
+                    const y = event.offsetY - 180,
+                    xRotation = y / -360,
+                    x = event.offsetX - 180,
+                    yRotation = x / 360,
+                    brightness = (Math.abs(-360 + x + y) / 360) + .5;
+                    this.style.setProperty('--x-rotation', xRotation + 'rad');
+                    this.style.setProperty('--y-rotation', yRotation + 'rad');
+                    this.style.setProperty('--brightness', brightness);
+                });
+                diiv.appendChild(inner);
                 if ("{{ lobby.host.id }}" == "{{ user.id }}")  {
                     diiv.addEventListener("click", Attack(i, host_field[i]["attack"]));
                 }
@@ -152,12 +181,25 @@ chatSocket.onmessage = function(e) {
             if (player_field[i] != null) {
                 diiv = document.createElement("a")
                 diiv.style.padding = "1em";
-                diiv.innerHTML = `<div">
+                inner = document.createElement("div")
+                inner.classList.add("card")
+                inner.innerHTML = `
                     <h3>${player_field[i]["name"]}</h3>
                     <p>Health: ${player_field[i]["health"]}</p>
                     <p>Attack: ${player_field[i]["attack"]}</p>
                     <p>Defense: ${player_field[i]["defense"]}</p>
-                    </div>`
+                    `;
+                inner.addEventListener("mousemove", function(event) {
+                    const y = event.offsetY - 180,
+                    xRotation = y / -360,
+                    x = event.offsetX - 180,
+                    yRotation = x / 360,
+                    brightness = (Math.abs(-360 + x + y) / 360) + .5;
+                    this.style.setProperty('--x-rotation', xRotation + 'rad');
+                    this.style.setProperty('--y-rotation', yRotation + 'rad');
+                    this.style.setProperty('--brightness', brightness);
+                });
+                diiv.appendChild(inner);
                 if ("{{ lobby.host.id }}" !== "{{ user.id }}")  {
                     diiv.addEventListener("click", Attack(i, player_field[i]["attack"]));
                 }
@@ -218,7 +260,9 @@ function Attack(identity, attack_power) {
                                 "cur_value": `${parseInt(player_field[i]['health'])}`,
                                 "defense": `${parseInt(player_field[i]['defense'])}`,
                                 "gameState": state,
-                                "my_lp": `${player_lp}`
+                                "my_lp": `${player_lp}`,
+                                "player_field": player_field,
+                                "host_field": host_field,
                             }));
                         break;
                     }
@@ -236,7 +280,9 @@ function Attack(identity, attack_power) {
                         "value": attack_power,
                         "cur_value": `${player_lp}`,
                         "gameState": state,
-                        "my_lp": `${host_lp}`
+                        "my_lp": `${host_lp}`,
+                        "player_field": player_field,
+                        "host_field": host_field,
                     }));
             }
         }
@@ -254,7 +300,9 @@ function Attack(identity, attack_power) {
                                 "cur_value": `${parseInt(host_field[i]['health'])}`,
                                 "defense": `${parseInt(host_field[i]['defense'])}`,
                                 "gameState": state,
-                                "my_lp": `${host_lp}`
+                                "my_lp": `${host_lp}`,
+                                "player_field": player_field,
+                                "host_field": host_field,
                             }));
                         break;
                     }
@@ -272,7 +320,9 @@ function Attack(identity, attack_power) {
                         "value": attack_power,
                         "cur_value": `${host_lp}`,
                         "gameState": state,
-                        "my_lp": `${player_lp}`
+                        "my_lp": `${player_lp}`,
+                        "player_field": player_field,
+                        "host_field": host_field,
                     }));
             }
         }

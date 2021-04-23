@@ -122,41 +122,39 @@ class CardConsumer(AsyncWebsocketConsumer):
         self.scope['gameState'] = text_data_json['gameState']
         # more information on these can be found in the file "acts.md"
         if text_data_json["action"] == "attack":
-            if text_data_json['target'] == "host" or not self.scope['_host_cards_in_play']:
+            self.scope['_host_cards_in_play'] = text_data_json['host_field']
+            self.scope['_player_cards_in_play'] = text_data_json['player_field']
+            if text_data_json['target'] == "host" or (
+                not self.scope['_host_cards_in_play'][0] and
+                not self.scope['_host_cards_in_play'][1] and
+                not self.scope['_host_cards_in_play'][2]
+                ):
                 self.scope['_host_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
                 self.scope['_player_lp'] = int(text_data_json['my_lp'])
-            elif text_data_json['target'] == "player" or not self.scope['_player_cards_in_play']:
+            elif text_data_json['target'] == "player" or (
+                not self.scope['_player_cards_in_play'][0] and
+                not self.scope['_player_cards_in_play'][1] and
+                not self.scope['_player_cards_in_play'][2] 
+                ):
                 self.scope['_player_lp'] = int(text_data_json['cur_value']) - int(text_data_json['value'])
                 self.scope['_host_lp'] = int(text_data_json['my_lp'])
             else:
                 slot = int(text_data_json['target'])
                 if slot <= 2:
-                    if slot > 2: slot = 2
-                    while not self.scope['_host_cards_in_play'][slot]:
-                        print(slot, self.scope['_host_cards_in_play'])
-                        slot += 1
-                        if slot > 2:
-                            slot = 0
                     self.scope['_host_cards_in_play'][slot]['health'] = (
                         int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_host_cards_in_play'][slot]['health'] <= 0:
                         self.scope['_host_cards_in_play'][slot] = None
-                        self.scope['_host_cards_in_play'] = await self.condenseList(self.scope['_host_cards_in_play'])
+                        #self.scope['_host_cards_in_play'] = await self.condenseList(self.scope['_host_cards_in_play'])
                 else:
-                    print("SLOT", slot)
-                    if slot > 2: slot = 2
-                    while not self.scope['_player_cards_in_play'][slot-3]:
-                        print(slot, self.scope['_player_cards_in_play'])
-                        slot += 1
-                        if slot > 2:
-                            slot = 0
+                    print("SELECT ENEMY", self.scope['_player_cards_in_play'][slot-3])
                     self.scope['_player_cards_in_play'][slot-3]['health'] = (
                         int(text_data_json['cur_value']) - int(text_data_json['value']) + int(text_data_json['defense'])
                     )
                     if self.scope['_player_cards_in_play'][slot-3]['health'] <= 0:
                         self.scope['_player_cards_in_play'][slot-3] = None
-                        self.scope['_player_cards_in_play'] = await self.condenseList(self.scope['_player_cards_in_play'])
+                        #self.scope['_player_cards_in_play'] = await self.condenseList(self.scope['_player_cards_in_play'])
         elif text_data_json['action'] == 'draw':
             if text_data_json['actor'] == 'host':
                 i = int(text_data_json['value'])

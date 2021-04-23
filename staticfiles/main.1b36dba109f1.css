@@ -1,0 +1,13 @@
+.card {
+    background: url("/static/card_background.27433988aee2.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    max-width: 180px;
+    transition: all .15s linear;
+    transform-origin: center center;
+}
+.card:hover {
+    max-width: 360px;
+    transform: rotateX(var(--x-rotation, 0)) rotateY(var(--y-rotation, 0));
+    filter: brightness(var(--brightness, 1));
+}
