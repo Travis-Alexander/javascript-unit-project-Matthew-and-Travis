@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from .views import lobby_room
+from cards.views import StartNewLobby
 from accounts.views import (
     AcceptFriendRequest,
     DeclineFriendRequest,
@@ -40,4 +41,5 @@ urlpatterns = [
     path("remove_friend/<int:userID>/", RemoveFriend, name="remove_friend"),
     path("customize_deck/", DeckCustomization.as_view(), name="deck_customization"),
     path("customize_deck/save", UpdateDeck, name="deck_customization/save"),
+    path("new_lobby/", StartNewLobby.as_view(), name="new_lobby")
 ]
