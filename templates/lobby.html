@@ -218,7 +218,9 @@ function Attack(identity, attack_power) {
                                 "cur_value": `${parseInt(player_field[i]['health'])}`,
                                 "defense": `${parseInt(player_field[i]['defense'])}`,
                                 "gameState": state,
-                                "my_lp": `${player_lp}`
+                                "my_lp": `${player_lp}`,
+                                "player_field": player_field,
+                                "host_field": host_field,
                             }));
                         break;
                     }
@@ -236,7 +238,9 @@ function Attack(identity, attack_power) {
                         "value": attack_power,
                         "cur_value": `${player_lp}`,
                         "gameState": state,
-                        "my_lp": `${host_lp}`
+                        "my_lp": `${host_lp}`,
+                        "player_field": player_field,
+                        "host_field": host_field,
                     }));
             }
         }
@@ -254,7 +258,9 @@ function Attack(identity, attack_power) {
                                 "cur_value": `${parseInt(host_field[i]['health'])}`,
                                 "defense": `${parseInt(host_field[i]['defense'])}`,
                                 "gameState": state,
-                                "my_lp": `${host_lp}`
+                                "my_lp": `${host_lp}`,
+                                "player_field": player_field,
+                                "host_field": host_field,
                             }));
                         break;
                     }
@@ -272,7 +278,9 @@ function Attack(identity, attack_power) {
                         "value": attack_power,
                         "cur_value": `${host_lp}`,
                         "gameState": state,
-                        "my_lp": `${player_lp}`
+                        "my_lp": `${player_lp}`,
+                        "player_field": player_field,
+                        "host_field": host_field,
                     }));
             }
         }
