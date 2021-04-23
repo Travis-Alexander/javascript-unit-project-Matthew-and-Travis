@@ -16,7 +16,7 @@
     filter: brightness(var(--brightness, 1));
 }
 </style>
-<h1>{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
+<h1 id="announce">{{ lobby.host.username }} vs {{ lobby.player.username }}</h1>
 <h2 id="HOST_LP"></h2>
 <h2 id="PLAYER_LP"></h2>
 <p>Remove LP from the host</p>
@@ -99,7 +99,10 @@ chatSocket.onmessage = function(e) {
     player_deck = data.host_cards_in_deck;
     player_field = data._player_cards_in_play;
     gameState = data.gameState;
-    
+    if (host_lp <= 0 || player_lp <= 0) {
+        document.getElementById("announce").innerText="GAME OVER";
+    }
+    else {
     if ("{{ lobby.host.id }}" == "{{ user.id }}") {
         select_hand = host_hand
     }
@@ -203,11 +206,10 @@ chatSocket.onmessage = function(e) {
         }
     }
     
-
+    }
 }
 function PlaceCard(identity) {
     return function() {
-        console.log("IN FUNC", host_hand, ", ", player_hand)
         var actor = "host";
         var state = 1;
         var expected_state = 0;
@@ -242,7 +244,6 @@ function Attack(identity, attack_power) {
         }
         if ((gameState == expected_state || gameState == expected_state - 1) && default_target == "player") {
             if (player_field && player_field.length > 0) {
-                console.log("Queueing to attack...")
                 let found_target = false;
                 for (let i = 0; i < player_field.length; i++) {
                     if (player_field[i] && parseInt(player_field[i]['defense']) < attack_power) {
